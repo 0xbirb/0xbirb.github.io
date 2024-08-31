@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Creating my own HoneyPot with T-Pot | A cybersecurity blog</title><meta name="author" content="Ludwig Schober"><meta name="copyright" content="Ludwig Schober"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="For this project, i’ll be using a Virtual Private Server offered by the German cloud provider NetCup. You will learn how to install T-Pot, the all in one HoneyPot in this blog post.  My server has the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Creating my own HoneyPot with T-Pot">
+<meta property="og:url" content="https://0xbirb-new.github.io/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/index.html">
+<meta property="og:site_name" content="A cybersecurity blog">
+<meta property="og:description" content="For this project, i’ll be using a Virtual Private Server offered by the German cloud provider NetCup. You will learn how to install T-Pot, the all in one HoneyPot in this blog post.  My server has the">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-06-29T11:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-31T13:13:31.903Z">
+<meta property="article:author" content="Ludwig Schober">
+<meta property="article:tag" content="Honeypot">
+<meta property="article:tag" content="TPot">
+<meta property="article:tag" content="security">
+<meta property="article:tag" content="infosec">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://0xbirb-new.github.io/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Creating my own HoneyPot with T-Pot',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-31 15:13:31'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="A cybersecurity blog"><span class="site-name">A cybersecurity blog</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Creating my own HoneyPot with T-Pot</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-06-29T11:00:00.000Z" title="Created 2024-06-29 13:00:00">2024-06-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-08-31T13:13:31.903Z" title="Updated 2024-08-31 15:13:31">2024-08-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Writeups/">Writeups</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Writeups/Backdoor/">Backdoor</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Creating my own HoneyPot with T-Pot"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>For this project, i’ll be using a Virtual Private Server offered by the German cloud provider NetCup. You will learn how to install <a target="_blank" rel="noopener" href="https://github.com/telekom-security/tpotce">T-Pot</a>, the all in one HoneyPot in this blog post. </p>
+<p>My server has the following dimensions witch are more than enough to satisfy the <a target="_blank" rel="noopener" href="https://github.com/telekom-security/tpotce/blob/master/README.md#system-requirements">system requirments</a>:</p>
+<pre><code>- RAM 8,192MiB (8GB)
+- 4x CPU Cores of x86 Architecture
+- 160 GiB Harddrive
+</code></pre>
+<br>
+
+<h2 id="Setting-up-our-server"><a href="#Setting-up-our-server" class="headerlink" title="Setting up our server"></a>Setting up our server</h2><p>For the OS I choose Debian 12 with code name “Bookworm”. If you’re also using a VPS, I recommend choosing a SSH-Key instead of a username and password for authentication. Since the automatic SSH Deployment did not work, I first created a user which we will be using to copy our ssh key to server with.</p>
+<p><img src="/assets/img/tpot/specs.png" alt="Desktop View"></p>
+<p>After waiting a few minutes, the image is successfully deployed, and we can try connecting.</p>
+<p><img src="/assets/img/tpot/specs2.png" alt="Desktop View"></p>
+<p>In order to access the system easily from my workstation, I’ve generated a fresh SSH Key to authenticate against the server and added it to the server using ssh-copy-id:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#generate strong key, optionally add passphrase</span></span><br><span class="line">ssh-keygen -t ed25519 -C <span class="string">&quot;YourSSH-Key Label&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#next. copy public key to our server</span></span><br><span class="line">ssh-copy-id user@vps_public_ip</span><br><span class="line"></span><br><span class="line"><span class="comment">#authenticate to the server using the ssh key</span></span><br><span class="line">ssh -i <span class="string">&quot;YourSSH-KeyLabel.pub&quot;</span> user@vps_public_ip</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/img/tpot/ssh-setup1.png" alt="Desktop View"></p>
+<p>The command shows it executed properly, we should now be able to authenticate with our newly generated ssh-key.</p>
+<p><img src="/assets/img/tpot/ssh-setup2.png" alt="Desktop View"><br>voilà! we get a shell and can now proceed with the installation of t-pot.</p>
+<br>
+<br>
+
+<h2 id="Setting-up-T-Pot"><a href="#Setting-up-T-Pot" class="headerlink" title="Setting up T-Pot"></a>Setting up T-Pot</h2><p>This is a fairly straight-forward process. We can clone the repository or create our own ISO File using makeiso.sh script from T-Pot’s GitHub. I choose the simplest method and just went the default installation that sets up a docker instance for the honeypot.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#install git if not already installed</span></span><br><span class="line"><span class="built_in">sudo</span> apt install git</span><br><span class="line"></span><br><span class="line"><span class="comment">#copy tpot repo</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/telekom-security/tpotce</span><br><span class="line"><span class="built_in">cd</span> tpotce</span><br></pre></td></tr></table></figure>
+
+<p>Install T-Pot as current user</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
+
+<p>The installation will do the following which we have to keep in mind:</p>
+<ul>
+<li>Changes the SSH Port to tcp&#x2F;64295, since we want to use ssh’s standardized port 22 as a honeypot</li>
+<li>Disable the DNS Stub Listener to avoid port conflicts with honeypots</li>
+<li>Set the firewall target for the public zone to ACCEPT</li>
+<li>Add Docker’s repository and install Docker</li>
+<li>Add the current user to the docker group</li>
+<li>Add and enable <code>tpot.service</code> to <code>/etc/systemd/system</code> so T-Pot can automatically start and stop</li>
+</ul>
+<br>
+
+<p><img src="/assets/img/tpot/installation.png" alt="Desktop View"></p>
+<p>When prompted for the type, I went with the Full Hive (option h) - this will require the most resources but will include all features.<br>If you’re unsure what to go for it might be sensible to check t-pot’s <a target="_blank" rel="noopener" href="https://github.com/telekom-security/tpotce#system-requirements">system requirments</a> </p>
+<br>
+
+<p>Once the installer is finished we need to reboot the machine and access it on port 64295 using ssh:<br><img src="/assets/img/tpot/installation-sshconnect.png" alt="Desktop View"></p>
+<br>
+
+<p><strong>Optional:</strong> Opt-Out from submitting data to Telekoms Sicherheitstacho</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#stop t-pot</span></span><br><span class="line">systemctl stop tpot</span><br><span class="line"></span><br><span class="line"><span class="comment">#edit .yml file</span></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line"><span class="comment">#remove Ewsposter service from the .yml file</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#start t-pot </span></span><br><span class="line">systemctl start tpot</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/img/tpot/telemtry.png" alt="Desktop View"><br>Remove the Ewsposter section to remove Telemetry</p>
+<br>
+
+<p>Now that we verified ssh login works, we can check out  our main form of administration using the Web-server created by T-Pot</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://vps_public_ip&gt;:64297</span><br></pre></td></tr></table></figure>
+
+<p>Since we do not have a officially signed certificate, we will have to click through the warning that the webserver is not secure and proceed to log in using the defined user during the installation of t-pot</p>
+<p><img src="/assets/img/tpot/web1.png" alt="Desktop View"></p>
+<p>We are now greeted by t-Pots interface and can navigate to the Attack Map or the Kibana Dashboard where we are able to view the specific attacks that are happening on our honeypots</p>
+<p><img src="/assets/img/tpot/web2.png" alt="Desktop View"></p>
+<p>Great, we now completed the installation of t-pot. In the following sections, I will go into depth on what kind of honeypots are now set up and how to play around with the data.</p>
+<br>
+<br>
+
+<h2 id="Overview-of-the-Dashboards"><a href="#Overview-of-the-Dashboards" class="headerlink" title="Overview of the Dashboards"></a>Overview of the Dashboards</h2><h3 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h3><p>On the landing page, we can choose the Kibana Dashboard witch is pretty cool, we can review each HoneyPot in detail and how exactly its being attacked.</p>
+<p><img src="/assets/img/tpot/kibana.png" alt="Desktop View"></p>
+<br>
+
+<p>For example, we can look at the entirety of the T-Pot Honeypots which we deployed. After around two Days of running it, we have a total of 66,234 attacks. For this reason, I also suggest lowering the amount of logs that we store to a period of 7 Days instead of 30 Days.</p>
+<p><img src="/assets/img/tpot/kibana2.png" alt="Desktop View"></p>
+<br>
+
+<h3 id="Attack-Map"><a href="#Attack-Map" class="headerlink" title="Attack Map"></a>Attack Map</h3><p>The Attack Map is a live Dashboard of our HoneyPot and how it’s being attacked from the globe. The marked Dots indicate known malicious adversaries that automatically try to compromise systems in the wild, you can gain a little intel by hovering over them.</p>
+<p><img src="/assets/img/tpot/attackmap.png" alt="Desktop View"></p>
+<br>
+
+<h3 id="CyberChef"><a href="#CyberChef" class="headerlink" title="CyberChef"></a>CyberChef</h3><p>Cyberchef is a simple, intuitive web app for analyzing and decoding data without having to deal with complex tools or programming languages. You can “BAKE” recipes and reuse them</p>
+<p><img src="/assets/img/tpot/cyberchef.png" alt="Desktop View"></p>
+<br>
+
+<h3 id="SpiderFoot"><a href="#SpiderFoot" class="headerlink" title="SpiderFoot"></a>SpiderFoot</h3><p>SpiderFoot is an automated OSINT Tool that allows you to scan domains, IP adresses, hostnames, entire subnets and much more from within your newly setup VPS.</p>
+<p>There’s different types of scans:</p>
+<ul>
+<li><p>Get anything and everything about the target; <strong>ALL</strong></p>
+</li>
+<li><p>Understand what information this target exposes to the Internet; <strong>Footprinting</strong></p>
+</li>
+<li><p>Best for when you suspect the target to be malicious but need more information; <strong>Investigation</strong></p>
+</li>
+<li><p>When you don’t want the target to even suspect they are being investigated; <strong>Passive</strong></p>
+</li>
+</ul>
+<p>Depending on the target, SpiderFoot can scrape lot’s of data and provide you with valuable information like the email address format that the corporation uses. This can be quiet neat in engagements. </p>
+<p>Keep in mind that scanning a target only should be done in a ethical manner and not without permission, since public scanning is forbidden in certain countries.</p>
+<p><img src="/assets/img/tpot/spider.png" alt="Desktop View"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://0xbirb-new.github.io">Ludwig Schober</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://0xbirb-new.github.io/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/">https://0xbirb-new.github.io/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Honeypot/">Honeypot</a><a class="post-meta__tags" href="/tags/TPot/">TPot</a><a class="post-meta__tags" href="/tags/security/">security</a><a class="post-meta__tags" href="/tags/infosec/">infosec</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/08/21/2024-08-21-Vulnlab%20Forgotten%20--%20writeup/" title="Vulnlab Forgotten -- writeup"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">Previous</div><div class="prev_info">Vulnlab Forgotten -- writeup</div></div></a></div><div class="next-post pull-right"><a href="/2024/05/23/Introduction%20to%20this%20blog/" title="Introduction to this Blog"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">Next</div><div class="next_info">Introduction to this Blog</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2024/08/21/2024-08-21-Vulnlab%20Forgotten%20--%20writeup/" title="Vulnlab Forgotten -- writeup"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-21</div><div class="title">Vulnlab Forgotten -- writeup</div></div></a></div><div><a href="/2024/05/23/Introduction%20to%20this%20blog/" title="Introduction to this Blog"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-23</div><div class="title">Introduction to this Blog</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Ludwig Schober</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Setting-up-our-server"><span class="toc-number">1.</span> <span class="toc-text">Setting up our server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Setting-up-T-Pot"><span class="toc-number">2.</span> <span class="toc-text">Setting up T-Pot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview-of-the-Dashboards"><span class="toc-number">3.</span> <span class="toc-text">Overview of the Dashboards</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Kibana"><span class="toc-number">3.1.</span> <span class="toc-text">Kibana</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Attack-Map"><span class="toc-number">3.2.</span> <span class="toc-text">Attack Map</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CyberChef"><span class="toc-number">3.3.</span> <span class="toc-text">CyberChef</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SpiderFoot"><span class="toc-number">3.4.</span> <span class="toc-text">SpiderFoot</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/31/my-notes/" title="Untitled">Untitled</a><time datetime="2024-08-31T13:13:16.366Z" title="Created 2024-08-31 15:13:16">2024-08-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/24/hello-world/" title="Hello World">Hello World</a><time datetime="2024-08-24T09:37:08.205Z" title="Created 2024-08-24 11:37:08">2024-08-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/21/2024-08-21-Vulnlab%20Forgotten%20--%20writeup/" title="Vulnlab Forgotten -- writeup">Vulnlab Forgotten -- writeup</a><time datetime="2024-08-21T12:00:00.000Z" title="Created 2024-08-21 14:00:00">2024-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/" title="Creating my own HoneyPot with T-Pot">Creating my own HoneyPot with T-Pot</a><time datetime="2024-06-29T11:00:00.000Z" title="Created 2024-06-29 13:00:00">2024-06-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/05/23/Introduction%20to%20this%20blog/" title="Introduction to this Blog">Introduction to this Blog</a><time datetime="2024-05-23T11:00:00.000Z" title="Created 2024-05-23 13:00:00">2024-05-23</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Ludwig Schober</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
